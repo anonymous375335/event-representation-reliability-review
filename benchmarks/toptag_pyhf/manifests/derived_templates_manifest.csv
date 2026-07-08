@@ -1,0 +1,14 @@
+artifact,shard,seed,run_dir,primary_files,role
+E79,shard000,41,runs/20260703-122310-e79-toptag-score-template-export,"score_templates.csv;score_summary.csv;constituent_balanced.pt",frozen_reference_and_templates
+E79,shard000,42,runs/20260703-121216-e79-toptag-score-template-export,"score_templates.csv;score_summary.csv;constituent_balanced.pt",frozen_reference_and_templates
+E79,shard000,43,runs/20260703-122603-e79-toptag-score-template-export,"score_templates.csv;score_summary.csv;constituent_balanced.pt",frozen_reference_and_templates
+E79,shard001,41,runs/20260703-152532-e79-toptag-score-template-export,"score_templates.csv;score_summary.csv;constituent_balanced.pt",frozen_reference_and_templates
+E79,shard001,42,runs/20260703-123910-e79-toptag-score-template-export,"score_templates.csv;score_summary.csv;constituent_balanced.pt",frozen_reference_and_templates
+E79,shard001,43,runs/20260703-153239-e79-toptag-score-template-export,"score_templates.csv;score_summary.csv;constituent_balanced.pt",frozen_reference_and_templates
+E91d,shard000,41,runs/20260703-151522-e91-toptag-frozen-template-residual-target,"score_templates.csv;score_summary.csv;frozen_residual_targets.csv",residual_target_candidate
+E91d,shard000,42,runs/20260703-150329-e91-toptag-frozen-template-residual-target,"score_templates.csv;score_summary.csv;frozen_residual_targets.csv",residual_target_candidate
+E91d,shard000,43,runs/20260703-151909-e91-toptag-frozen-template-residual-target,"score_templates.csv;score_summary.csv;frozen_residual_targets.csv",residual_target_candidate
+E91d,shard001,41,runs/20260703-152829-e91-toptag-frozen-template-residual-target,"score_templates.csv;score_summary.csv;frozen_residual_targets.csv",residual_target_candidate
+E91d,shard001,42,runs/20260703-150729-e91-toptag-frozen-template-residual-target,"score_templates.csv;score_summary.csv;frozen_residual_targets.csv",residual_target_candidate
+E91d,shard001,43,runs/20260703-153537-e91-toptag-frozen-template-residual-target,"score_templates.csv;score_summary.csv;frozen_residual_targets.csv",residual_target_candidate
+

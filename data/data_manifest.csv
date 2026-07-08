@@ -1,0 +1,8 @@
+asset,description,expected_files,expected_event_shape,tracked_in_git
+cms_h4l_open_data_root,CMS H->ZZ->4l reduced NanoAOD MC and observed data ROOT files,8,ROOT Events tree,no
+cms_h4l_e65_tensor,Derived selected H4l MC candidate tensor produced by scripts/e65_cms_h4l_event_tensor_export.py,1,features N x 4 x 10; conditions N x 5; labels N,no
+cms_h4l_evenet_teacher,Frozen public EveNet checkpoint used for H4l bridge experiments,1,checkpoint,no
+toptag_record80030_first_shards,ATLAS TopTag record 80030 first balanced systematic-domain shards,6 selected domain index files,particle-level arrays with systematic domains,no
+toptag_record80030_h5_cache,Derived HDF5 cache for selected record 80030 shards,varies,per-jet high-level and constituent arrays,no
+toptag_reference_dataset,Top Quark Tagging Reference Dataset DOI 10.5281/zenodo.2603256,train/validation HDF5 files,particle-level top-tagging reference,no
+toptag_constituent_checkpoints,Constituent encoder checkpoints for E76b/E77/E78,varies,checkpoint,no

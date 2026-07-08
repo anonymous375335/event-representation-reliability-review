@@ -1,0 +1,15 @@
+panel,metric,value,baseline
+probe_control,true_z_phys_domain_probe,0.2256386798710061,0.2
+probe_control,true_z_nuis_domain_probe,0.2473618004254054,0.2
+probe_control,shuffled_z_nuis_domain_probe,0.19993138622692863,0.2
+probe_control,injected_onehot_domain_probe,1.0,0.2
+probe_control,teacher_embedding_domain_probe,0.2382956338769069,0.2
+physics_leakage_control,z_nuis_physics_probe_auc,0.5619071776196363,0.5
+rank,train_z_phys_effective_rank,2.7385170551445914,0.0
+rank,val_z_phys_effective_rank,2.7424711853906394,0.0
+rank,train_z_nuis_effective_rank,6.266663175891693,0.0
+rank,val_z_nuis_effective_rank,6.26384068366179,0.0
+collapse,train_z_phys_near_zero_dims,0,0.0
+collapse,val_z_phys_near_zero_dims,0,0.0
+collapse,train_z_nuis_near_zero_dims,0,0.0
+collapse,val_z_nuis_near_zero_dims,0,0.0

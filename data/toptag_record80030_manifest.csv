@@ -1,0 +1,10 @@
+asset,source,record_or_doi,domain,selected_scope,tracked_in_git,note
+record80030_nominal,CERN Open Data,80030,nominal,first balanced shard used with up to 100000 events,no,Selected for E76b multiseed and E77 training
+record80030_esup,CERN Open Data,80030,esup,first balanced shard used with up to 100000 events,no,Energy-scale-up systematic domain
+record80030_esdown,CERN Open Data,80030,esdown,first balanced shard used with up to 100000 events,no,Energy-scale-down systematic domain
+record80030_cer,CERN Open Data,80030,cer,first balanced shard used with up to 100000 events,no,Cluster-energy-resolution systematic domain
+record80030_cpos,CERN Open Data,80030,cpos,first balanced shard used with up to 100000 events,no,Cluster-position systematic domain
+record80030_bias,CERN Open Data,80030,bias,first balanced shard used with up to 100000 events,no,Held out in E77 and included in E76b multiseed
+toptag_reference_dataset,Zenodo,10.5281/zenodo.2603256,reference,300000 train and 150000 validation events in E78,no,Reference score calibration
+derived_h5_cache,local preprocessing from record 80030,80030,all selected domains,HDF5 cache produced by e75b/e75c helper routines,no,Regenerate from public record 80030 files
+derived_checkpoints,local training artifacts,not applicable,all selected domains,E76b/E77/E78 trained models and probes,no,External review artifact or regenerated from scripts

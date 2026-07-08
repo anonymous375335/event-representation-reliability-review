@@ -1,0 +1,5 @@
+metric,reference_mean,reference_sd,frozen_target_mean,frozen_target_sd,interpretation
+auc_loss,0.0000,0.0000,-0.0010,0.0003,all_six_settings_pass_auc_loss_gate
+unmodeled_mean_abs_mu_bias,0.0099,0.0075,0.0056,0.0045,aggregate_improves_but_only_3_of_6_individual_settings_improve
+unmodeled_max_abs_mu_bias,0.0136,0.0099,0.0087,0.0067,aggregate_improves_and_5_of_6_individual_settings_improve
+

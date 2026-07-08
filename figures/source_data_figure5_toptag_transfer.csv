@@ -1,0 +1,15 @@
+panel,model,metric,mean,sd
+e76b_multiseed,shared_baseline,physics_auc,0.9522,0.0006
+e76b_multiseed,split_candidate,physics_auc,0.9519,0.0001
+e76b_multiseed,shared_baseline,z_nuis_physics_auc,0.9347,0.0022
+e76b_multiseed,split_candidate,z_nuis_physics_auc,0.6063,0.0044
+e76b_multiseed,shared_baseline,z_nuis_domain_acc,0.1799,0.0008
+e76b_multiseed,split_candidate,z_nuis_domain_acc,0.2321,0.0016
+e76b_multiseed,shared_baseline,background_rejection_30pct,381.4,27.0
+e76b_multiseed,split_candidate,background_rejection_30pct,384.1,28.9
+e77_holdout,heldout_shared_baseline,holdout_physics_auc,0.9497212640688609,0
+e77_holdout,heldout_split_candidate,holdout_physics_auc,0.9498888257463565,0
+e77_holdout,heldout_shared_baseline,holdout_z_nuis_physics_auc,0.933614284035783,0
+e77_holdout,heldout_split_candidate,holdout_z_nuis_physics_auc,0.6220142167344858,0
+e78_reference,reference_constituent_baseline,physics_auc,0.9710382806021703,0
+e78_reference,reference_constituent_baseline,background_rejection_30pct,280.6353383458646,0

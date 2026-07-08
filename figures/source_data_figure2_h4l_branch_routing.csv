@@ -1,0 +1,9 @@
+metric,model,mean,sd,direction
+physics_auc,shared_baseline,0.988885,0.000512,higher_is_better
+physics_auc,split_candidate,0.989350,0.000413,higher_is_better
+z_nuis_physics_auc,shared_baseline,0.961186,0.012826,lower_is_better
+z_nuis_physics_auc,split_candidate,0.592599,0.030156,lower_is_better
+z_nuis_domain_acc,shared_baseline,0.225912,0.002075,higher_than_random_readability
+z_nuis_domain_acc,split_candidate,0.247860,0.000574,higher_than_random_readability
+score_domain_drift_max,shared_baseline,0.001371,0.000955,lower_is_better
+score_domain_drift_max,split_candidate,0.001129,0.000600,lower_is_better

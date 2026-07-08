@@ -1,0 +1,19 @@
+record: 80030
+benchmark: toptag_pyhf
+default_seed: 42
+max_events_per_domain: 100000
+batch_size: 4096
+epochs: 6
+shards:
+  shard000:
+    manifest: benchmarks/toptag_pyhf/manifests/record80030_files.csv
+    frozen_reference_runs:
+      seed41: runs/20260703-122310-e79-toptag-score-template-export
+      seed42: runs/20260703-121216-e79-toptag-score-template-export
+      seed43: runs/20260703-122603-e79-toptag-score-template-export
+  shard001:
+    manifest: benchmarks/toptag_pyhf/manifests/selected_shard001.csv
+    frozen_reference_runs:
+      seed41: runs/20260703-152532-e79-toptag-score-template-export
+      seed42: runs/20260703-123910-e79-toptag-score-template-export
+      seed43: runs/20260703-153239-e79-toptag-score-template-export

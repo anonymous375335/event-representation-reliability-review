@@ -1,0 +1,13 @@
+workspace_type: pyhf_histfactory_minimal
+candidate: constituent_shared_baseline
+nominal_domain: nominal
+modeled_variation: energy_scale
+modeled_domains:
+  hi: esup
+  lo: esdown
+unmodeled_stress_domains:
+  - cer
+  - cpos
+  - bias
+poi: mu
+workspace_note: benchmark_workspace
