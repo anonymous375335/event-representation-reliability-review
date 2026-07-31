@@ -18,4 +18,7 @@ data/*
 !data/data_manifest.csv
 !data/cms_h4l_open_data_manifest.csv
 !data/toptag_record80030_manifest.csv
+!data/reviewer_artifact_archive_v1.sha256
+!data/reviewer_artifact_archive_v1_manifest.csv
+!data/reviewer_artifact_archive_v1_original_binary_availability.csv
 data_processed/

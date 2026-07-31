@@ -1,0 +1,13 @@
+artifact,shard,seed,status,archive_path
+E79,shard000,41,preserved_original,runs/toptag/e79/shard000_seed41
+E79,shard000,42,preserved_original,runs/toptag/e79/shard000_seed42
+E79,shard000,43,preserved_original,runs/toptag/e79/shard000_seed43
+E79,shard001,41,regeneration_only_original_not_synced,
+E79,shard001,42,preserved_original,runs/toptag/e79/shard001_seed42
+E79,shard001,43,regeneration_only_original_not_synced,
+E91d,shard000,41,regeneration_only_original_not_synced,
+E91d,shard000,42,regeneration_only_original_not_synced,
+E91d,shard000,43,regeneration_only_original_not_synced,
+E91d,shard001,41,regeneration_only_original_not_synced,
+E91d,shard001,42,regeneration_only_original_not_synced,
+E91d,shard001,43,regeneration_only_original_not_synced,
