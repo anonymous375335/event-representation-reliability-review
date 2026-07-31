@@ -6,7 +6,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
+from matplotlib.patches import Ellipse, FancyArrowPatch, FancyBboxPatch
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -14,18 +14,30 @@ FIGURES = ROOT / "figures"
 
 
 COLORS = {
-    "shared": "#7884B4",
-    "split": "#0F4D92",
-    "split_soft": "#B4C0E4",
-    "nuis": "#F0C0CC",
-    "domain": "#42949E",
-    "control": "#767676",
-    "warning": "#B64342",
-    "positive": "#2E9E44",
-    "neutral": "#CFCECE",
+    "shared": "#FEC47B",
+    "split": "#5196C5",
+    "split_soft": "#A2D2E6",
+    "nuis": "#FEC47B",
+    "domain": "#5196C5",
+    "domain_soft": "#EAF5FB",
+    "analysis": "#A2D2E6",
+    "analysis_soft": "#F0F9FC",
+    "accent": "#E1422E",
+    "accent_soft": "#FCE6E2",
+    "panel_bg": "#FFFDF4",
+    "panel_header": "#5196C5",
+    "control": "#6F7378",
+    "warning": "#E1422E",
+    "positive": "#5196C5",
+    "positive_control": "#7E65A8",
+    "positive_control_soft": "#F0ECF7",
+    "neutral": "#D8DDE2",
     "ink": "#272727",
-    "grid": "#E8EAF0",
+    "grid": "#E9EEF3",
 }
+MODEL_SHARED_COLOR = COLORS["accent"]
+MODEL_SPLIT_COLOR = COLORS["split"]
+M4L_REFERENCE_COLOR = "#7E65A8"
 
 
 mpl.rcParams.update(
@@ -34,15 +46,15 @@ mpl.rcParams.update(
         "font.sans-serif": ["Arial", "Helvetica", "DejaVu Sans", "sans-serif"],
         "svg.fonttype": "none",
         "pdf.fonttype": 42,
-        "font.size": 7,
+        "font.size": 9.0,
         "axes.spines.top": False,
         "axes.spines.right": False,
         "axes.linewidth": 0.7,
-        "axes.labelsize": 7,
-        "axes.titlesize": 7.4,
-        "xtick.labelsize": 6.4,
-        "ytick.labelsize": 6.4,
-        "legend.fontsize": 6.2,
+        "axes.labelsize": 9.0,
+        "axes.titlesize": 9.2,
+        "xtick.labelsize": 8.2,
+        "ytick.labelsize": 8.2,
+        "legend.fontsize": 8.2,
         "legend.frameon": False,
         "figure.dpi": 180,
     }
@@ -60,13 +72,26 @@ def save(fig, stem, width_mm=183, height_mm=None):
     plt.close(fig)
 
 
-def panel_label(ax, label):
+def panel_label(ax, label, x=-0.06, y=1.00):
     ax.text(
-        -0.15,
-        1.08,
+        x,
+        y,
         label,
         transform=ax.transAxes,
-        fontsize=8.2,
+        fontsize=9.4,
+        fontweight="bold",
+        va="bottom",
+        ha="left",
+    )
+
+
+def figure_panel_label(fig, ax, label, dx=0.028, dy=0.010):
+    bbox = ax.get_position()
+    fig.text(
+        bbox.x0 - dx,
+        bbox.y1 + dy,
+        label,
+        fontsize=9.4,
         fontweight="bold",
         va="bottom",
         ha="left",
@@ -74,7 +99,14 @@ def panel_label(ax, label):
 
 
 def style_ygrid(ax):
+    ax.set_facecolor("#FCFBF8")
     ax.grid(axis="y", color=COLORS["grid"], linewidth=0.55)
+    ax.set_axisbelow(True)
+
+
+def style_xgrid(ax):
+    ax.set_facecolor("#FCFBF8")
+    ax.grid(axis="x", color=COLORS["grid"], linewidth=0.55)
     ax.set_axisbelow(True)
 
 
@@ -107,9 +139,9 @@ def paired_slope(ax, values, errors, ylabel, title, ylim=None, reference=None, v
     ax.scatter([0], [values[0]], s=28, color=COLORS["shared"], zorder=3)
     ax.scatter([1], [values[1]], s=28, color=COLORS["split"], zorder=3)
     for xi, yi, ha, dx in [(0, values[0], "left", 0.055), (1, values[1], "left", 0.055)]:
-        ax.text(xi + dx, yi, fmt_value(yi, value_format), ha=ha, va="center", fontsize=6.1, color=COLORS["ink"])
+        ax.text(xi + dx, yi, fmt_value(yi, value_format), ha=ha, va="center", fontsize=7.3, color=COLORS["ink"])
     ax.set_xticks(x)
-    ax.set_xticklabels(["shared", "split"])
+    ax.set_xticklabels(["shared\nbaseline", "split\ncandidate"])
     ax.set_xlim(-0.25, 1.25)
     ax.set_ylabel(ylabel)
     ax.set_title(title, loc="left", pad=3)
@@ -120,240 +152,494 @@ def paired_slope(ax, values, errors, ylabel, title, ylim=None, reference=None, v
     style_ygrid(ax)
 
 
+def comparison_strip(
+    ax,
+    shared,
+    split,
+    errors,
+    xlabel,
+    xlim,
+    value_format="{:.3f}",
+    reference=None,
+    overlays=None,
+    shared_color=None,
+    split_color=None,
+):
+    shared_color = shared_color or COLORS["shared"]
+    split_color = split_color or COLORS["split"]
+    ax.set_facecolor("#FCFBF8")
+    ax.set_xlim(*xlim)
+    ax.set_ylim(-0.55, 0.72)
+    ax.set_yticks([])
+    ax.grid(axis="x", color=COLORS["grid"], linewidth=0.55)
+    ax.set_axisbelow(True)
+    right_label_transform = ax.get_yaxis_transform()
+    if reference is not None:
+        ax.axvline(reference, color=COLORS["control"], linewidth=0.75, linestyle=(0, (3, 2)))
+    y_shared, y_split = 0.16, -0.14
+    ax.errorbar(
+        [shared],
+        [y_shared],
+        xerr=[errors[0]],
+        fmt="o",
+        color=shared_color,
+        ecolor=shared_color,
+        markerfacecolor=shared_color,
+        markeredgecolor=shared_color,
+        markersize=4.8,
+        elinewidth=0.8,
+        capsize=2.0,
+        zorder=3,
+    )
+    ax.errorbar(
+        [split],
+        [y_split],
+        xerr=[errors[1]],
+        fmt="s",
+        color=split_color,
+        ecolor=split_color,
+        markerfacecolor=split_color,
+        markeredgecolor=split_color,
+        markersize=4.8,
+        elinewidth=0.8,
+        capsize=2.0,
+        zorder=3,
+    )
+    if overlays:
+        for overlay in overlays:
+            y = overlay.get("y", -0.30)
+            ax.plot(
+                [overlay["shared"], overlay["split"]],
+                [y, y],
+                color=overlay.get("color", COLORS["warning"]),
+                linewidth=0.85,
+                linestyle=overlay.get("linestyle", (0, (2, 2))),
+                zorder=2,
+            )
+            marker = overlay.get("marker", "o")
+            ax.scatter(
+                [overlay["shared"], overlay["split"]],
+                [y, y],
+                s=20,
+                marker=marker,
+                facecolor=overlay.get("facecolor", "white"),
+                edgecolor=overlay.get("color", COLORS["warning"]),
+                linewidth=0.9,
+                zorder=4,
+            )
+            ax.text(
+                1.01,
+                y,
+                overlay["label"],
+                transform=right_label_transform,
+                ha="left",
+                va="center",
+                fontsize=8.2,
+                color=overlay.get("color", COLORS["warning"]),
+            )
+    ax.text(1.01, y_shared, f"shared {value_format.format(shared)}", transform=right_label_transform, ha="left", va="center", fontsize=8.2, color=shared_color)
+    ax.text(1.01, y_split, f"split {value_format.format(split)}", transform=right_label_transform, ha="left", va="center", fontsize=8.2, color=split_color)
+    ax.set_xlabel(xlabel)
+
+
+def ratio_residual_panel(ax, overlay):
+    centers = 0.5 * (overlay["bin_low"].to_numpy(float) + overlay["bin_high"].to_numpy(float))
+    observed = overlay["observed_count"].to_numpy(float)
+    expected = overlay["mc_total_sideband_scaled"].to_numpy(float)
+    err = overlay["observed_err"].to_numpy(float)
+    residual = (observed - expected) / np.maximum(err, 1.0)
+    in_window = overlay["in_higgs_window"].astype(str).str.lower().eq("true").to_numpy()
+    ax.axhline(0, color=COLORS["control"], linewidth=0.8)
+    ax.axvspan(115.0, 135.0, color=COLORS["warning"], alpha=0.055)
+    ax.scatter(centers[~in_window], residual[~in_window], s=14, color=COLORS["split"], alpha=0.85, label="sideband")
+    ax.scatter(centers[in_window], residual[in_window], s=16, color=COLORS["warning"], alpha=0.9, label="Higgs window")
+    ax.text(171, 2.45, "sideband", fontsize=7.2, color=COLORS["split"], ha="right")
+    ax.text(171, 1.95, "Higgs window", fontsize=7.2, color=COLORS["warning"], ha="right")
+    ax.set_xlim(70, 180)
+    ax.set_ylim(-3.2, 3.2)
+    ax.set_xlabel("$m_{4l}$ [GeV]")
+    ax.set_ylabel("(data - MC) / stat. err.")
+    style_ygrid(ax)
+
+
+def appendix_likelihood_scan_panel(ax, scan_df, summary_df):
+    styles = {
+        "m4l": (M4L_REFERENCE_COLOR, "$m_{4l}$ reference", "-"),
+        "shared_baseline": (MODEL_SHARED_COLOR, "shared score", "-"),
+        "split_orth_adv": (MODEL_SPLIT_COLOR, "split $z_{phys}$ score", "-"),
+    }
+    for template, (color, label, linestyle) in styles.items():
+        rows = scan_df[scan_df["template"] == template].sort_values("mu")
+        ax.plot(
+            rows["mu"].to_numpy(float),
+            rows["minus2_delta_logl"].to_numpy(float),
+            color=color,
+            linewidth=1.45,
+            linestyle=linestyle,
+            label=label,
+        )
+        interval = summary_df[summary_df["template"] == template]
+        low = float(interval["mu_lo_approx"].iloc[0])
+        high = float(interval["mu_hi_approx"].iloc[0])
+        ax.scatter([low, high], [1, 1], s=12, color=color, zorder=3)
+    ax.axhline(1.0, color=COLORS["control"], linewidth=0.8, linestyle=(0, (3, 2)))
+    ax.axvline(1.0, color=COLORS["control"], linewidth=0.7, linestyle=":")
+    ax.text(
+        0.98,
+        0.18,
+        "$m_{4l}$ remains\nthe analysis anchor",
+        transform=ax.transAxes,
+        ha="right",
+        va="bottom",
+        fontsize=7.4,
+        color=M4L_REFERENCE_COLOR,
+    )
+    ax.set_xlim(0.48, 1.62)
+    ax.set_ylim(0, 1.35)
+    ax.set_xlabel("signal strength $\\mu$")
+    ax.set_ylabel("$-2\\Delta\\log L$")
+    ax.legend(
+        loc="upper center",
+        bbox_to_anchor=(0.5, 0.99),
+        ncol=3,
+        handlelength=1.35,
+        columnspacing=0.95,
+    )
+    style_ygrid(ax)
+
+
 def figure1_workflow():
-    fig, ax = plt.subplots(figsize=(7.2, 4.05))
+    mass_template = source("source_data_figure4_likelihood_template_bins.csv")
+    mass_template = mass_template[mass_template["template"] == "m4l"]
+    mass_template = mass_template.groupby(["bin_low", "bin_high"], as_index=False)["signal"].sum()
+    mass_x = 0.5 * (mass_template["bin_low"].to_numpy(float) + mass_template["bin_high"].to_numpy(float))
+    mass_y = mass_template["signal"].to_numpy(float)
+    mass_y = mass_y / mass_y.max()
+
+    fig, ax = plt.subplots(figsize=(7.15, 5.60))
     ax.set_axis_off()
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
 
-    def box(x, y, w, h, text, fc, ec=COLORS["ink"], fontsize=6.8, weight="normal"):
+    def box(
+        x,
+        y,
+        w,
+        h,
+        text,
+        fc,
+        ec=COLORS["ink"],
+        fontsize=7.3,
+        weight="normal",
+        color=COLORS["ink"],
+        lw=1.1,
+        radius=0.012,
+    ):
         patch = FancyBboxPatch(
             (x, y),
             w,
             h,
-            boxstyle="round,pad=0.018,rounding_size=0.018",
-            linewidth=0.75,
+            boxstyle=f"round,pad=0.010,rounding_size={radius}",
+            linewidth=lw,
             edgecolor=ec,
             facecolor=fc,
         )
         ax.add_patch(patch)
-        ax.text(x + w / 2, y + h / 2, text, ha="center", va="center", fontsize=fontsize, fontweight=weight)
+        ax.text(
+            x + w / 2,
+            y + h / 2,
+            text,
+            ha="center",
+            va="center",
+            fontsize=fontsize,
+            fontweight=weight,
+            color=color,
+            linespacing=1.15,
+        )
         return patch
 
-    def arrow(a, b, yoff=0, color=COLORS["ink"]):
+    def arrow(a, b, yoff=0, color=COLORS["ink"], lw=1.15, scale=9.0, style="-|>"):
         ax.add_patch(
             FancyArrowPatch(
                 a,
                 b,
-                arrowstyle="-|>",
-                mutation_scale=8,
-                linewidth=0.8,
+                arrowstyle=style,
+                mutation_scale=scale,
+                linewidth=lw,
                 color=color,
                 connectionstyle=f"arc3,rad={yoff}",
             )
         )
 
-    ax.text(0.03, 0.93, "Two-channel reliability protocol", fontsize=9.4, fontweight="bold")
-    ax.text(
-        0.03,
-        0.875,
-        "Branch routing is evaluated as a representation diagnostic alongside likelihood-facing checks",
-        fontsize=6.8,
-        color=COLORS["control"],
-    )
+    def panel_title(y, label, title):
+        ax.text(0.035, y, label, fontsize=10.0, fontweight="bold", va="top", ha="left")
+        ax.text(0.075, y, title, fontsize=9.2, fontweight="bold", va="top", ha="left")
 
-    # Light group panels make the flow readable without putting cards inside cards.
-    ax.text(0.05, 0.795, "inputs", fontsize=6.5, fontweight="bold", color=COLORS["control"])
-    ax.text(0.30, 0.795, "representation", fontsize=6.5, fontweight="bold", color=COLORS["control"])
-    ax.text(0.56, 0.795, "branch routing", fontsize=6.5, fontweight="bold", color=COLORS["control"])
-    ax.text(0.83, 0.795, "readouts", fontsize=6.5, fontweight="bold", color=COLORS["control"])
+    def reduction_card(x, title, start, end):
+        y, w, h = 0.015, 0.190, 0.130
+        box(x, y, w, h, "", "#FFFFFF", COLORS["neutral"], lw=0.95)
+        ax.text(x + 0.018, y + 0.113, title, fontsize=7.1, fontweight="bold", ha="left", va="center")
+        ax.text(x + 0.018, y + 0.080, "leakage AUC", fontsize=6.1, color=COLORS["control"], ha="left")
+        x0, x1, yy = x + 0.045, x + 0.145, y + 0.032
+        ax.scatter([x0], [yy], s=30, color=MODEL_SHARED_COLOR, marker="o", zorder=3)
+        arrow((x0 + 0.012, yy), (x1 - 0.012, yy), color=COLORS["control"], lw=1.0, scale=7.5)
+        ax.scatter([x1], [yy], s=30, color=MODEL_SPLIT_COLOR, marker="s", zorder=3)
+        ax.text(x0, yy + 0.017, f"{start:.3f}", fontsize=6.5, color=MODEL_SHARED_COLOR, ha="center")
+        ax.text(x1, yy + 0.017, f"{end:.3f}", fontsize=6.5, color=MODEL_SPLIT_COLOR, ha="center")
+        ax.text((x0 + x1) / 2, yy - 0.032, "leakage reduced", fontsize=5.9, color=COLORS["control"], ha="center")
 
-    box(0.04, 0.62, 0.18, 0.12, "CMS H4l\nopen data", "#F5F6F8")
-    box(0.04, 0.43, 0.18, 0.12, "TopTag\nsystematic shards", "#F3F7F7", COLORS["domain"])
-    box(0.04, 0.24, 0.18, 0.12, "visible-domain\nchecks", "#F7F7F7", COLORS["control"])
+    risk_color = "#B83B73"
+    risk_soft = "#FBE8F1"
 
-    box(0.29, 0.62, 0.19, 0.12, "four-lepton tensors\n+ frozen EveNet", "#F5F6F8")
-    box(0.29, 0.43, 0.19, 0.12, "constituents\n+ DeepSets encoder", "#F3F7F7", COLORS["domain"])
-    box(0.29, 0.24, 0.19, 0.12, "matched H4l\nvariants", "#F7F7F7", COLORS["control"])
+    # a. Hero: the representation can support two task readouts.
+    panel_title(0.965, "a", "High accuracy can hide leakage")
+    box(0.045, 0.670, 0.210, 0.100, "", "#FFFFFF", COLORS["neutral"], fontsize=7.0)
+    collision = (0.079, 0.720)
+    event_tracks = [(0.061, 0.746), (0.063, 0.694), (0.094, 0.752), (0.100, 0.700), (0.104, 0.728)]
+    for endpoint in event_tracks:
+        ax.plot([collision[0], endpoint[0]], [collision[1], endpoint[1]], color=COLORS["control"], linewidth=1.0)
+    ax.scatter([collision[0]], [collision[1]], s=8, color=COLORS["ink"], zorder=3)
+    ax.scatter([p[0] for p in event_tracks], [p[1] for p in event_tracks], s=10, color=COLORS["control"], zorder=3)
+    ax.plot([0.115, 0.115], [0.685, 0.755], color=COLORS["neutral"], linewidth=0.8)
+    ax.text(0.185, 0.720, "collider events", fontsize=7.3, ha="center", va="center", fontweight="bold")
 
-    box(0.56, 0.63, 0.19, 0.10, "shared baseline", "#EEF0FA", COLORS["shared"], weight="bold")
-    box(0.56, 0.45, 0.19, 0.10, "split candidate", "#EDF4F8", COLORS["split"], weight="bold")
-    box(0.545, 0.28, 0.10, 0.095, "$z_{phys}$\nphysics task", "#E9F0FA", COLORS["split"], fontsize=6.5)
-    box(0.665, 0.28, 0.10, 0.095, "$z_{nuis}$\nresponse", "#F6F1F3", COLORS["nuis"], fontsize=6.5)
+    # Latent cloud: marker shape distinguishes task classes, not the two case studies.
+    ax.add_patch(Ellipse((0.470, 0.720), 0.310, 0.205, facecolor="#F8FAFB", edgecolor=COLORS["control"], linewidth=1.15))
+    class_one_pts = [(0.385, 0.750), (0.405, 0.735), (0.425, 0.760), (0.445, 0.745), (0.455, 0.735), (0.475, 0.720), (0.400, 0.715), (0.420, 0.700)]
+    class_zero_pts = [(0.455, 0.690), (0.475, 0.675), (0.490, 0.705), (0.510, 0.690), (0.520, 0.680), (0.540, 0.665), (0.535, 0.715), (0.555, 0.700)]
+    domain_a = COLORS["nuis"]
+    domain_b = "#8B98A5"
+    for points, marker in ((class_one_pts, "o"), (class_zero_pts, "s")):
+        for point_a, point_b in zip(points[::2], points[1::2]):
+            ax.plot([point_a[0], point_b[0]], [point_a[1], point_b[1]], color=COLORS["neutral"], linewidth=0.75, zorder=1)
+        ax.scatter(*zip(*points[::2]), s=23, facecolors=domain_a, edgecolors=COLORS["control"], linewidths=0.7, marker=marker)
+        ax.scatter(*zip(*points[1::2]), s=23, facecolors=domain_b, edgecolors=COLORS["control"], linewidths=0.7, marker=marker)
+    ax.scatter([0.690], [0.855], s=13, color=COLORS["control"], marker="o")
+    ax.text(0.702, 0.855, "task label 1", fontsize=5.5, color=COLORS["control"], ha="left", va="center")
+    ax.scatter([0.790], [0.855], s=13, facecolors="#FFFFFF", edgecolors=COLORS["control"], linewidths=0.9, marker="s")
+    ax.text(0.802, 0.855, "task label 0", fontsize=5.5, color=COLORS["control"], ha="left", va="center")
+    ax.scatter([0.690], [0.885], s=15, facecolors=domain_a, edgecolors=COLORS["control"], linewidths=0.6, marker="o")
+    ax.text(0.702, 0.885, "domain A", fontsize=5.4, color=COLORS["control"], ha="left", va="center")
+    ax.scatter([0.790], [0.885], s=15, facecolors=domain_b, edgecolors=COLORS["control"], linewidths=0.6, marker="o")
+    ax.text(0.802, 0.885, "domain B", fontsize=5.4, color=COLORS["control"], ha="left", va="center")
+    ax.plot([0.3887, 0.5663], [0.6675, 0.7576], color=risk_color, linewidth=1.25, linestyle=(0, (3, 2)))
+    ax.text(0.535, 0.755, "task decision\nboundary", fontsize=5.1, color=risk_color, ha="center", va="bottom", linespacing=1.0)
+    ax.text(0.470, 0.850, "shared event embedding", fontsize=7.5, fontweight="bold", ha="center", va="center")
+    ax.text(0.455, 0.580, "same-label points shift across domains:\ntask and domain structure are jointly readable", fontsize=5.9, color=risk_color, ha="center", va="center", linespacing=1.15)
+    arrow((0.255, 0.720), (0.315, 0.720), color=COLORS["control"])
 
-    box(0.83, 0.63, 0.14, 0.09, "physics AUC", "#F7F7F7", COLORS["control"], fontsize=6.4)
-    box(0.83, 0.50, 0.14, 0.09, "$z_{nuis}$ leakage", "#F7F7F7", COLORS["control"], fontsize=6.4)
-    box(0.83, 0.37, 0.14, 0.09, "domain readout", "#F7F7F7", COLORS["control"], fontsize=6.4)
-    box(0.83, 0.24, 0.14, 0.09, "likelihood\nboundary", "#F7F7F7", COLORS["control"], fontsize=6.4)
+    box(0.700, 0.750, 0.185, 0.075, "main prediction\nhigh accuracy", "#EAF5FB", MODEL_SPLIT_COLOR, fontsize=7.0, weight="bold")
+    box(0.700, 0.635, 0.185, 0.075, "task and domain\nare jointly readable", risk_soft, risk_color, fontsize=7.0, weight="bold")
+    arrow((0.615, 0.752), (0.700, 0.787), color=MODEL_SPLIT_COLOR)
+    arrow((0.615, 0.685), (0.700, 0.672), color=risk_color)
 
-    for y in [0.68, 0.49, 0.30]:
-        arrow((0.22, y), (0.29, y))
-        arrow((0.48, y), (0.56, 0.68 if y == 0.68 else 0.50 if y == 0.49 else 0.33), yoff=0.02)
+    # b. Audit intervention, visually continuous with the latent representation above.
+    panel_title(0.485, "b", "Two-channel audit")
+    box(0.090, 0.350, 0.110, 0.070, "audit\nintervention", "#F5F6F7", COLORS["neutral"], fontsize=6.3, color=COLORS["control"], lw=0.9)
+    arrow((0.210, 0.385), (0.285, 0.385), color=COLORS["control"])
+    box(0.285, 0.350, 0.155, 0.070, "split candidate\nrepresentation", "#FFFFFF", COLORS["control"], fontsize=6.9, weight="bold")
+    box(0.515, 0.390, 0.145, 0.060, "$z_{phys}$\nphysics channel", "#EAF5FB", MODEL_SPLIT_COLOR, fontsize=6.7, weight="bold")
+    box(0.515, 0.285, 0.145, 0.060, "$z_{nuis}$\nnuisance channel", "#FFF4DE", COLORS["nuis"], fontsize=6.7, weight="bold")
+    box(0.750, 0.398, 0.120, 0.048, "task head  $f$", "#EAF5FB", MODEL_SPLIT_COLOR, fontsize=6.6)
+    box(0.750, 0.320, 0.120, 0.048, "domain probe  $g_d$", "#FFF4DE", COLORS["nuis"], fontsize=6.4)
+    box(0.750, 0.250, 0.120, 0.048, "leakage probe  $g_y$", risk_soft, risk_color, fontsize=6.4)
+    arrow((0.440, 0.390), (0.515, 0.420), color=MODEL_SPLIT_COLOR)
+    arrow((0.440, 0.380), (0.515, 0.315), color=COLORS["nuis"])
+    arrow((0.660, 0.420), (0.750, 0.422), color=MODEL_SPLIT_COLOR)
+    arrow((0.660, 0.315), (0.750, 0.344), color=COLORS["nuis"])
+    arrow((0.660, 0.300), (0.750, 0.274), color=risk_color)
 
-    arrow((0.75, 0.68), (0.83, 0.675))
-    arrow((0.75, 0.50), (0.83, 0.545))
-    arrow((0.75, 0.50), (0.83, 0.415), yoff=-0.08)
-    arrow((0.765, 0.33), (0.83, 0.285), yoff=0.05)
+    # c. Evidence and scope: results first, then a visually separate claim boundary.
+    panel_title(0.205, "c", "Evidence and scope")
+    reduction_card(0.030, "H4l routing", 0.961, 0.593)
 
-    ax.text(
-        0.55,
-        0.18,
-        "Controls: shuffled domains, injected labels, rank checks",
-        fontsize=6.5,
-        color=COLORS["control"],
-    )
+    # H4l-specific likelihood boundary sits in its own scoped card.
+    box(0.260, 0.015, 0.140, 0.130, "", "#F7F3FC", M4L_REFERENCE_COLOR, lw=0.95)
+    ax.text(0.280, 0.130, "H4l boundary", fontsize=6.6, color=M4L_REFERENCE_COLOR, fontweight="bold", ha="left")
+    mass_plot_x = 0.280 + 0.100 * (mass_x - mass_x.min()) / (mass_x.max() - mass_x.min())
+    mass_plot_y = 0.045 + 0.045 * mass_y
+    ax.plot(mass_plot_x, mass_plot_y, color=M4L_REFERENCE_COLOR, linewidth=1.25)
+    ax.fill_between(mass_plot_x, 0.045, mass_plot_y, color="#F1E8FF", alpha=0.9)
+    ax.text(0.330, 0.105, "$m_{4\\ell}$ signal template", fontsize=6.0, color=M4L_REFERENCE_COLOR, ha="center")
+    ax.text(0.330, 0.022, "before full likelihood", fontsize=5.7, color=COLORS["control"], ha="center")
+
+    box(0.445, 0.015, 0.200, 0.130, "", "#F5F6F7", COLORS["control"], lw=0.95)
+    ax.text(0.463, 0.120, "Controls", fontsize=7.1, fontweight="bold", ha="left", va="center")
+    for check_y in (0.082, 0.047):
+        ax.plot([0.462, 0.467, 0.476], [check_y, check_y - 0.006, check_y + 0.008], color=COLORS["control"], linewidth=1.35, solid_capstyle="round")
+    ax.text(0.488, 0.082, "probe sensitivity passed", fontsize=6.1, color=COLORS["ink"], ha="left", va="center")
+    ax.text(0.488, 0.047, "non-collapse passed", fontsize=6.1, color=COLORS["ink"], ha="left", va="center")
+    reduction_card(0.690, "TopTag cross-workflow check", 0.935, 0.606)
     save(fig, "figure1_workflow_schematic")
 
 
 def figure2_h4l_branch_routing():
     df = source("source_data_figure2_h4l_branch_routing.csv")
-    fig, axes = plt.subplots(2, 2, figsize=(7.2, 4.85), gridspec_kw={"wspace": 0.36, "hspace": 0.52})
+    fig = plt.figure(figsize=(6.3, 3.59))
+    gs = fig.add_gridspec(2, 3, height_ratios=[1.55, 1.0], hspace=0.95, wspace=0.72)
+    ax = fig.add_subplot(gs[0, :])
+    shared, shared_err = metric_row(df, "z_nuis_physics_auc", "shared_baseline")
+    split, split_err = metric_row(df, "z_nuis_physics_auc", "split_candidate")
+    comparison_strip(
+        ax,
+        shared,
+        split,
+        [shared_err, split_err],
+        "$z_{nuis}$ physics AUC (lower is less leakage)",
+        (0.50, 1.00),
+        "{:.3f}",
+        0.5,
+        shared_color=MODEL_SHARED_COLOR,
+        split_color=MODEL_SPLIT_COLOR,
+    )
+    ax.text(
+        0.50,
+        0.92,
+        f"physics leakage reduced: {shared:.3f} $\\rightarrow$ {split:.3f}",
+        transform=ax.transAxes,
+        ha="center",
+        va="top",
+        fontsize=8.2,
+        color=COLORS["ink"],
+        fontweight="bold",
+    )
+    label_axes = [(ax, "a")]
+
     specs = [
-        ("physics_auc", "Physics task is preserved", "AUC", (0.9878, 0.9902), None, "{:.4f}"),
-        ("z_nuis_physics_auc", "$z_{nuis}$ physics leakage decreases", "probe AUC", (0.50, 1.00), 0.5, "{:.3f}"),
-        ("z_nuis_domain_acc", "$z_{nuis}$ remains domain-readable", "probe accuracy", (0.18, 0.27), 0.2, "{:.3f}"),
-        ("score_domain_drift_max", "Score drift stays small", "max mean-score drift", (0.0, 0.0026), None, "{:.4f}"),
+        ("physics_auc", "Physics AUC\n(task preserved)", (0.9878, 0.9902), None, "{:.4f}"),
+        ("z_nuis_domain_acc", "$z_{nuis}$ domain accuracy\n(domain remains readable)", (0.18, 0.27), 0.2, "{:.3f}"),
+        ("score_domain_drift_max", "maximum score drift\nacross domains", (0.0, 0.0026), None, "{:.4f}"),
     ]
-    for ax, (metric, title, ylabel, ylim, ref, value_format), label in zip(axes.flat, specs, "abcd"):
+    for ax, (metric, xlabel, xlim, ref, value_format), label in zip([fig.add_subplot(gs[1, i]) for i in range(3)], specs, "bcd"):
         rows = [
             metric_row(df, metric, "shared_baseline"),
             metric_row(df, metric, "split_candidate"),
         ]
         vals, errs = [row[0] for row in rows], [row[1] for row in rows]
-        paired_slope(ax, vals, errs, ylabel, title, ylim, ref, value_format)
-        panel_label(ax, label)
-    axes[0, 1].annotate(
-        "large reduction",
-        xy=(1, metric_row(df, "z_nuis_physics_auc", "split_candidate")[0]),
-        xytext=(0.45, 0.72),
-        textcoords="axes fraction",
-        arrowprops={"arrowstyle": "-", "linewidth": 0.65, "color": COLORS["control"]},
-        fontsize=6.4,
-        color=COLORS["control"],
-    )
+        comparison_strip(
+            ax,
+            vals[0],
+            vals[1],
+            errs,
+            xlabel,
+            xlim,
+            value_format,
+            ref,
+            shared_color=MODEL_SHARED_COLOR,
+            split_color=MODEL_SPLIT_COLOR,
+        )
+        if metric == "physics_auc":
+            ax.set_xticks([0.988, 0.989, 0.990])
+            ax.set_xticklabels(["0.988", "0.989", "0.990"])
+        label_axes.append((ax, label))
     handles = [
-        plt.Line2D([], [], marker="o", color="none", markerfacecolor=COLORS["shared"], markeredgecolor=COLORS["shared"], markersize=5),
-        plt.Line2D([], [], marker="o", color="none", markerfacecolor=COLORS["split"], markeredgecolor=COLORS["split"], markersize=5),
+        plt.Line2D([], [], marker="o", color="none", markerfacecolor=MODEL_SHARED_COLOR, markeredgecolor=MODEL_SHARED_COLOR, markersize=5),
+        plt.Line2D([], [], marker="s", color="none", markerfacecolor=MODEL_SPLIT_COLOR, markeredgecolor=MODEL_SPLIT_COLOR, markersize=5),
     ]
-    fig.legend(handles, ["shared baseline", "split candidate"], loc="upper center", ncol=2, bbox_to_anchor=(0.5, 1.0))
-    fig.subplots_adjust(top=0.88)
+    fig.legend(handles, ["shared baseline", "split candidate"], loc="upper center", ncol=2, bbox_to_anchor=(0.5, 1.02))
+    fig.subplots_adjust(top=0.88, right=0.82, left=0.10, bottom=0.12)
+    for label_ax, label in label_axes:
+        figure_panel_label(fig, label_ax, label)
     save(fig, "figure2_h4l_branch_routing")
 
 
 def figure3_h4l_controls():
     df = source("source_data_figure3_h4l_controls.csv")
-    fig, axes = plt.subplots(1, 3, figsize=(7.2, 2.85), gridspec_kw={"wspace": 0.42})
-    ax = axes[0]
-    rows = df[df["panel"] == "probe_control"].copy()
-    names = ["$z_{phys}$", "$z_{nuis}$", "shuffled", "injected", "teacher"]
-    vals = rows["value"].to_numpy()
+    fig = plt.figure(figsize=(6.3, 3.19))
+    gs = fig.add_gridspec(2, 2, width_ratios=[1.25, 1.0], wspace=0.45, hspace=0.58)
+    ax = fig.add_subplot(gs[:, 0])
+    label_axes = [(ax, "a")]
+    metrics = [
+        "true_z_phys_domain_probe",
+        "true_z_nuis_domain_probe",
+        "shuffled_z_nuis_domain_probe",
+        "teacher_embedding_domain_probe",
+    ]
+    names = ["$z_{phys}$ domain", "$z_{nuis}$ domain", "shuffled control", "teacher embedding"]
+    vals = [
+        float(df[(df["panel"] == "probe_control") & (df["metric"] == metric)]["value"].iloc[0])
+        for metric in metrics
+    ]
+    injected_domain = float(df[(df["panel"] == "probe_control") & (df["metric"] == "injected_onehot_domain_probe")]["value"].iloc[0])
     ypos = np.arange(len(vals))[::-1]
-    colors = [COLORS["split_soft"], COLORS["split"], COLORS["control"], COLORS["warning"], COLORS["domain"]]
+    colors = [COLORS["split"], COLORS["nuis"], COLORS["control"], COLORS["domain"]]
     for y, val, col in zip(ypos, vals, colors):
         ax.plot([0.2, val], [y, y], color=COLORS["grid"], linewidth=1.0, zorder=1)
         ax.scatter(val, y, s=28, color=col, zorder=2)
-        ax.text(val + 0.018, y, f"{val:.3f}" if val < 0.999 else "1.0", va="center", fontsize=5.9)
+        ax.text(val + 0.006, y, f"{val:.3f}" if val < 0.999 else "1.0", va="center", fontsize=7.2)
     ax.axvline(0.2, color=COLORS["control"], linewidth=0.8, linestyle=(0, (3, 2)))
+    ax.text(
+        0.205,
+        -0.45,
+        f"off-axis control = {injected_domain:.1f} (probe capacity)",
+        fontsize=7.0,
+        color=COLORS["positive_control"],
+        ha="left",
+    )
     ax.set_yticks(ypos)
     ax.set_yticklabels(names)
-    ax.set_xlim(0.16, 1.08)
+    ax.set_xlim(0.18, 0.30)
+    ax.set_ylim(-0.72, len(vals) - 0.35)
     ax.set_xlabel("domain-probe accuracy")
-    ax.set_title("Probe controls", loc="left", pad=3)
-    ax.grid(axis="x", color=COLORS["grid"], linewidth=0.55)
-    ax.set_axisbelow(True)
-    panel_label(ax, "a")
+    style_xgrid(ax)
 
-    ax = axes[1]
+    ax = fig.add_subplot(gs[0, 1])
+    label_axes.append((ax, "b"))
     leak = float(df[(df["panel"] == "physics_leakage_control") & (df["metric"] == "z_nuis_physics_probe_auc")]["value"].iloc[0])
     vals = [1.0, leak]
     ypos = np.array([1, 0])
-    labels = ["injected control", "$z_{nuis}$ physics"]
-    for y, val, col in zip(ypos, vals, [COLORS["warning"], COLORS["split"]]):
+    labels = ["injected physics", "$z_{nuis}$ physics"]
+    for y, val, col in zip(ypos, vals, [COLORS["positive_control"], COLORS["nuis"]]):
         ax.plot([0.5, val], [y, y], color=COLORS["grid"], linewidth=1.0)
         ax.scatter(val, y, s=30, color=col, zorder=2)
-        ax.text(val + 0.018, y, f"{val:.3f}" if val < 0.999 else "1.0", va="center", fontsize=5.9)
+        ax.text(val + 0.018, y, f"{val:.3f}" if val < 0.999 else "1.0", va="center", fontsize=7.2)
     ax.axvline(0.5, color=COLORS["control"], linewidth=0.8, linestyle=(0, (3, 2)))
     ax.set_yticks(ypos)
     ax.set_yticklabels(labels)
     ax.set_xlim(0.45, 1.08)
     ax.set_xlabel("physics-probe AUC")
-    ax.set_title("Capacity is sufficient", loc="left", pad=3)
-    ax.grid(axis="x", color=COLORS["grid"], linewidth=0.55)
-    ax.set_axisbelow(True)
-    panel_label(ax, "b")
+    style_xgrid(ax)
 
-    ax = axes[2]
+    ax = fig.add_subplot(gs[1, 1])
+    label_axes.append((ax, "c"))
     rank = df[df["panel"] == "rank"].copy()
     phys_train = float(rank[rank["metric"] == "train_z_phys_effective_rank"]["value"].iloc[0])
     phys_val = float(rank[rank["metric"] == "val_z_phys_effective_rank"]["value"].iloc[0])
     nuis_train = float(rank[rank["metric"] == "train_z_nuis_effective_rank"]["value"].iloc[0])
     nuis_val = float(rank[rank["metric"] == "val_z_nuis_effective_rank"]["value"].iloc[0])
+    train_offset = 0.085
+    val_offset = -0.085
     for y, vals, col, label in [
-        (1, [phys_train, phys_val], COLORS["split_soft"], "$z_{phys}$"),
-        (0, [nuis_train, nuis_val], COLORS["split"], "$z_{nuis}$"),
+        (1, [phys_train, phys_val], COLORS["split"], "$z_{phys}$"),
+        (0, [nuis_train, nuis_val], COLORS["nuis"], "$z_{nuis}$"),
     ]:
-        ax.plot(vals, [y, y], color=col, linewidth=1.1)
-        ax.scatter(vals[0], y, s=28, color="white", edgecolor=col, linewidth=1.0, zorder=2, label="train" if y == 1 else None)
-        ax.scatter(vals[1], y, s=28, color=col, zorder=2, label="validation" if y == 1 else None)
-        ax.text(vals[1] + 0.16, y, f"{vals[1]:.2f}", va="center", fontsize=6.0, color=COLORS["ink"])
-    ax.set_xlim(0, 7.2)
+        y_train = y + train_offset
+        y_val = y + val_offset
+        ax.plot(vals, [y_train, y_val], color=col, linewidth=0.9, alpha=0.65, zorder=1)
+        ax.scatter(vals[0], y_train, s=30, color="white", edgecolor=col, linewidth=1.0, zorder=3)
+        ax.scatter(vals[1], y_val, s=30, color=col, zorder=3)
+        ax.text(vals[0] + 0.38, y_train, f"train: {vals[0]:.2f}", va="center", fontsize=7.0, color=COLORS["ink"])
+        ax.text(vals[1] + 0.38, y_val, f"val: {vals[1]:.2f}", va="center", fontsize=7.0, color=COLORS["ink"])
+    ax.set_xlim(0, 7.45)
     ax.set_yticks([0, 1])
     ax.set_yticklabels(["$z_{nuis}$", "$z_{phys}$"])
     ax.set_xlabel("effective rank")
-    ax.set_title("No latent collapse", loc="left", pad=3)
-    ax.legend(loc="upper right", bbox_to_anchor=(1.0, 1.02), borderaxespad=0)
-    ax.grid(axis="x", color=COLORS["grid"], linewidth=0.55)
-    ax.set_axisbelow(True)
-    panel_label(ax, "c")
+    style_xgrid(ax)
+    for label_ax, label in label_axes:
+        figure_panel_label(fig, label_ax, label, dx=0.050, dy=0.014)
     save(fig, "figure3_h4l_controls")
 
 
 def figure4_h4l_boundary_checks():
-    df = source("source_data_figure4_h4l_boundary_checks.csv")
     overlay = source("source_data_figure4_control_region_overlay.csv")
-    fig = plt.figure(figsize=(7.2, 5.25))
-    gs = fig.add_gridspec(2, 2, height_ratios=[1.0, 1.35], wspace=0.36, hspace=0.62)
-    ax = fig.add_subplot(gs[0, 0])
-    like = df[(df["panel"] == "likelihood") & (df["metric"] == "asimov_z")]
-    order = ["baseline_score", "m4l", "mass_penalty_score"]
-    labels = ["score", "$m_{4l}$", "mass-penalty score"]
-    vals = [float(like[like["template"] == key]["value"].iloc[0]) for key in order]
-    errs = [float(like[like["template"] == key]["sd"].iloc[0]) for key in order]
-    ypos = np.arange(3)[::-1]
-    for y, val, err, col in zip(ypos, vals, errs, [COLORS["control"], COLORS["positive"], COLORS["nuis"]]):
-        ax.plot([0, val], [y, y], color=COLORS["grid"], linewidth=1.1)
-        ax.errorbar(val, y, xerr=err, fmt="o", color=col, markersize=4.2, elinewidth=0.8, capsize=2.0)
-        ax.text(val + 0.08, y, f"{val:.2f}", va="center", fontsize=6.0)
-    ax.set_yticks(ypos)
-    ax.set_yticklabels(labels)
-    ax.set_xlabel("Asimov separation $Z$")
-    ax.set_title("$m_{4l}$ remains stronger", loc="left", pad=3)
-    ax.set_xlim(0, 3.25)
-    ax.grid(axis="x", color=COLORS["grid"], linewidth=0.55)
-    ax.set_axisbelow(True)
-    panel_label(ax, "a")
-
-    ax = fig.add_subplot(gs[0, 1])
-    obs = df[(df["panel"] == "control_region") & (df["template"] == "all_not_deduplicated")]
-    observed = float(obs[obs["metric"] == "observed_higgs_window"]["value"].iloc[0])
-    scaled = float(obs[obs["metric"] == "scaled_mc_higgs_window"]["value"].iloc[0])
-    vals = [observed, scaled]
-    labels = ["observed H window", "scaled MC H window"]
-    ypos = [1, 0]
-    for y, val, col in zip(ypos, vals, [COLORS["warning"], COLORS["split"]]):
-        ax.plot([0, val], [y, y], color=COLORS["grid"], linewidth=1.1)
-        ax.scatter(val, y, s=30, color=col, zorder=2)
-        ax.text(val + 0.45, y, f"{val:.1f}", va="center", fontsize=6.0)
-    ax.set_yticks(ypos)
-    ax.set_yticklabels(labels)
-    ax.set_xlabel("events")
-    ax.set_title("Observed-data sanity", loc="left", pad=3)
-    ax.set_xlim(0, 20)
-    ax.grid(axis="x", color=COLORS["grid"], linewidth=0.55)
-    ax.set_axisbelow(True)
-    panel_label(ax, "b")
-
-    ax = fig.add_subplot(gs[1, :])
+    fig, axes = plt.subplots(
+        2,
+        1,
+        figsize=(6.3, 3.63),
+        sharex=True,
+        gridspec_kw={"height_ratios": [2.05, 1.0], "hspace": 0.14},
+    )
+    ax = axes[0]
     lows = overlay["bin_low"].to_numpy(float)
     highs = overlay["bin_high"].to_numpy(float)
     centers = 0.5 * (lows + highs)
@@ -362,7 +648,7 @@ def figure4_h4l_boundary_checks():
     observed_err = overlay["observed_err"].to_numpy(float)
     mc_bkg = overlay["mc_bkg_sideband_scaled"].to_numpy(float)
     mc_total = overlay["mc_total_sideband_scaled"].to_numpy(float)
-    ax.axvspan(115.0, 135.0, color=COLORS["warning"], alpha=0.09, label="Higgs window, not fitted")
+    ax.axvspan(115.0, 135.0, color=COLORS["warning"], alpha=0.055, label="Higgs window, not fitted")
     ax.bar(
         centers,
         mc_bkg,
@@ -394,65 +680,143 @@ def figure4_h4l_boundary_checks():
     )
     ax.set_xlim(70, 180)
     ax.set_ylim(-0.8, 16.2)
-    ax.set_xlabel("$m_{4l}$ [GeV]")
     ax.set_ylabel("events / bin")
-    ax.set_title("Control-region overlay, sideband normalized", loc="left", pad=3)
-    ax.legend(loc="upper right", ncol=1, frameon=True, framealpha=0.95, borderpad=0.4, handlelength=1.4)
+    ax.tick_params(labelbottom=False)
+    ax.legend(loc="upper center", ncol=4, frameon=False, bbox_to_anchor=(0.55, 1.16), handlelength=1.2, columnspacing=0.9)
     style_ygrid(ax)
-    panel_label(ax, "c")
+
+    ratio_residual_panel(axes[1], overlay)
+    axes[0].text(
+        -0.185,
+        0.985,
+        "a",
+        transform=axes[0].transAxes,
+        fontsize=11.2,
+        fontweight="bold",
+        ha="right",
+        va="top",
+        color=COLORS["ink"],
+        clip_on=False,
+        zorder=10,
+    )
+    axes[1].text(
+        -0.185,
+        0.985,
+        "b",
+        transform=axes[1].transAxes,
+        fontsize=11.2,
+        fontweight="bold",
+        ha="right",
+        va="top",
+        color=COLORS["ink"],
+        clip_on=False,
+        zorder=10,
+    )
     save(fig, "figure4_h4l_boundary_checks")
 
 
 def figure5_toptag_transfer():
     df = source("source_data_figure5_toptag_transfer.csv")
-    fig, axes = plt.subplots(1, 3, figsize=(7.2, 2.85), gridspec_kw={"wspace": 0.42})
-    specs = [
-        ("physics_auc", "Tagging task is preserved", "AUC", (0.948, 0.954), None, "{:.4f}"),
-        ("z_nuis_physics_auc", "$z_{nuis}$ physics leakage decreases", "probe AUC", (0.55, 0.96), 0.5, "{:.3f}"),
-        ("z_nuis_domain_acc", "$z_{nuis}$ domain readout increases", "probe accuracy", (0.16, 0.25), None, "{:.3f}"),
-    ]
+    fig = plt.figure(figsize=(6.3, 3.59))
+    gs = fig.add_gridspec(2, 3, height_ratios=[1.55, 1.0], hspace=0.95, wspace=0.72)
     main = df[df["panel"] == "e76b_multiseed"]
-    for ax, (metric, title, ylabel, ylim, ref, value_format), label in zip(axes, specs, "abc"):
+
+    ax = fig.add_subplot(gs[0, :])
+    rows = main[main["metric"] == "z_nuis_physics_auc"]
+    shared = rows[rows["model"] == "shared_baseline"].iloc[0]
+    split = rows[rows["model"] == "split_candidate"].iloc[0]
+    held = df[(df["panel"] == "e77_holdout") & (df["metric"] == "holdout_z_nuis_physics_auc")]
+    overlays = [
+        {
+            "shared": float(held[held["model"] == "heldout_shared_baseline"]["mean"].iloc[0]),
+            "split": float(held[held["model"] == "heldout_split_candidate"]["mean"].iloc[0]),
+            "label": "held-out domain",
+            "color": COLORS["control"],
+            "y": -0.32,
+        }
+    ]
+    comparison_strip(
+        ax,
+        float(shared["mean"]),
+        float(split["mean"]),
+        [float(shared["sd"]), float(split["sd"])],
+        "$z_{nuis}$ physics AUC (lower is less leakage)",
+        (0.55, 0.96),
+        "{:.3f}",
+        0.5,
+        overlays,
+        shared_color=MODEL_SHARED_COLOR,
+        split_color=MODEL_SPLIT_COLOR,
+    )
+    ax.text(
+        0.50,
+        0.92,
+        f"cross-workflow check repeats the leakage drop: {float(shared['mean']):.3f} $\\rightarrow$ {float(split['mean']):.3f}",
+        transform=ax.transAxes,
+        ha="center",
+        va="top",
+        fontsize=8.2,
+        color=COLORS["ink"],
+        fontweight="bold",
+    )
+    label_axes = [(ax, "a")]
+
+    specs = [
+        ("physics_auc", "Tagging AUC\n(task preserved)", (0.948, 0.954), None, "{:.4f}"),
+        ("z_nuis_domain_acc", "$z_{nuis}$ domain accuracy\n(domain remains readable)", (0.16, 0.25), None, "{:.3f}"),
+        ("background_rejection_30pct", "30% efficiency\nbackground rejection", (0, 480), None, "{:.0f}"),
+    ]
+    for ax, (metric, xlabel, xlim, ref, value_format), label in zip([fig.add_subplot(gs[1, i]) for i in range(3)], specs, "bcd"):
         rows = main[main["metric"] == metric]
         shared = rows[rows["model"] == "shared_baseline"].iloc[0]
         split = rows[rows["model"] == "split_candidate"].iloc[0]
-        paired_slope(
+        overlays = []
+        if metric == "background_rejection_30pct":
+            ref_rows = df[(df["panel"] == "e78_reference") & (df["metric"] == "background_rejection_30pct")]
+            ref_val = float(ref_rows[ref_rows["model"] == "reference_constituent_baseline"]["mean"].iloc[0])
+            overlays.append(
+                {
+                    "shared": ref_val,
+                    "split": ref_val,
+                    "label": f"capacity only {ref_val:.0f}",
+                    "color": COLORS["control"],
+                    "marker": "^",
+                    "linestyle": ":",
+                }
+            )
+        comparison_strip(
             ax,
-            [float(shared["mean"]), float(split["mean"])],
+            float(shared["mean"]),
+            float(split["mean"]),
             [float(shared["sd"]), float(split["sd"])],
-            ylabel,
-            title,
-            ylim,
-            ref,
+            xlabel,
+            xlim,
             value_format,
+            ref,
+            overlays,
+            shared_color=MODEL_SHARED_COLOR,
+            split_color=MODEL_SPLIT_COLOR,
         )
-        panel_label(ax, label)
-    held = df[(df["panel"] == "e77_holdout") & (df["metric"] == "holdout_z_nuis_physics_auc")]
-    shared_h = float(held[held["model"] == "heldout_shared_baseline"]["mean"].iloc[0])
-    split_h = float(held[held["model"] == "heldout_split_candidate"]["mean"].iloc[0])
-    axes[1].plot(
-        [0.13, 1.13],
-        [shared_h, split_h],
-        color=COLORS["warning"],
-        marker="o",
-        markerfacecolor="white",
-        markeredgewidth=0.9,
-        markersize=3.4,
-        linewidth=0.9,
-        linestyle=(0, (2, 2)),
-    )
-    axes[1].set_xlim(-0.45, 1.35)
-    axes[1].text(
-        0.52,
-        0.90,
-        "held-out\nsystematic",
-        transform=axes[1].transAxes,
-        fontsize=6.1,
-        color=COLORS["warning"],
-        ha="left",
-        va="top",
-    )
+        label_axes.append((ax, label))
+    handles = [
+        plt.Line2D([], [], marker="o", color="none", markerfacecolor=MODEL_SHARED_COLOR, markeredgecolor=MODEL_SHARED_COLOR, markersize=5),
+        plt.Line2D([], [], marker="s", color="none", markerfacecolor=MODEL_SPLIT_COLOR, markeredgecolor=MODEL_SPLIT_COLOR, markersize=5),
+        plt.Line2D([], [], marker="o", color=COLORS["control"], markerfacecolor="white", markeredgecolor=COLORS["control"], markersize=4, linestyle=(0, (2, 2)), linewidth=0.85),
+        plt.Line2D([], [], marker="^", color="none", markerfacecolor="white", markeredgecolor=COLORS["control"], markersize=5, linewidth=0),
+    ]
+    fig.legend(handles, ["shared baseline", "split candidate", "held-out domain", "capacity calibration"], loc="upper center", ncol=4, bbox_to_anchor=(0.5, 1.02))
+    fig.subplots_adjust(top=0.88, right=0.82, left=0.10, bottom=0.12)
+    for label_ax, label in label_axes:
+        figure_panel_label(fig, label_ax, label)
     save(fig, "figure5_toptag_transfer")
+
+
+def figure_appendix_h4l_likelihood_scans():
+    scan_df = source("source_data_figure4_likelihood_scan_points.csv")
+    summary_df = source("source_data_figure4_likelihood_scan_summary.csv")
+    fig, ax = plt.subplots(figsize=(6.25, 3.05))
+    appendix_likelihood_scan_panel(ax, scan_df, summary_df)
+    save(fig, "figure_appendix_h4l_likelihood_scans")
 
 
 def main():
@@ -461,6 +825,7 @@ def main():
     figure3_h4l_controls()
     figure4_h4l_boundary_checks()
     figure5_toptag_transfer()
+    figure_appendix_h4l_likelihood_scans()
 
 
 if __name__ == "__main__":
