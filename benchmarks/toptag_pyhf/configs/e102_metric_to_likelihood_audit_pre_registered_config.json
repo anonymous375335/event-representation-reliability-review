@@ -1,0 +1,34 @@
+{
+  "experiment": "E102 frozen exact-checkpoint metric-to-likelihood audit",
+  "stage": "development_only_existing_shards",
+  "allowed_shards": ["000", "001"],
+  "forbidden_confirmation_shard": "002",
+  "data_root": "/root/autodl-tmp/year1",
+  "probe_epochs": 8,
+  "probe_seeds": [8201, 8202, 8203],
+  "batch_size": 4096,
+  "val_ratio": 0.2,
+  "groups": [
+    {"shard":"000","seed":41,"e79_run":"runs/20260703-122310-e79-toptag-score-template-export","e79_profile_run":"runs/20260703-122903-e81-toptag-profile-stress","e91d_run":"runs/20260703-151522-e91-toptag-frozen-template-residual-target","e91d_profile_run":"runs/20260703-151854-e81-toptag-profile-stress"},
+    {"shard":"000","seed":42,"e79_run":"runs/20260703-121216-e79-toptag-score-template-export","e79_profile_run":"runs/20260703-122241-e81-toptag-profile-stress","e91d_run":"runs/20260703-150329-e91-toptag-frozen-template-residual-target","e91d_profile_run":"runs/20260703-150701-e81-toptag-profile-stress"},
+    {"shard":"000","seed":43,"e79_run":"runs/20260703-122603-e79-toptag-score-template-export","e79_profile_run":"runs/20260703-122906-e81-toptag-profile-stress","e91d_run":"runs/20260703-151909-e91-toptag-frozen-template-residual-target","e91d_profile_run":"runs/20260703-152231-e81-toptag-profile-stress"},
+    {"shard":"001","seed":41,"e79_run":"runs/20260703-152532-e79-toptag-score-template-export","e79_profile_run":"runs/20260803-115232-e81-toptag-profile-stress","e91d_run":"runs/20260703-152829-e91-toptag-frozen-template-residual-target","e91d_profile_run":"runs/20260703-153157-e81-toptag-profile-stress"},
+    {"shard":"001","seed":42,"e79_run":"runs/20260703-123910-e79-toptag-score-template-export","e79_profile_run":"runs/20260703-130512-e81-toptag-profile-stress","e91d_run":"runs/20260703-150729-e91-toptag-frozen-template-residual-target","e91d_profile_run":"runs/20260703-151101-e81-toptag-profile-stress"},
+    {"shard":"001","seed":43,"e79_run":"runs/20260703-153239-e79-toptag-score-template-export","e79_profile_run":"runs/20260803-115236-e81-toptag-profile-stress","e91d_run":"runs/20260703-153537-e91-toptag-frozen-template-residual-target","e91d_profile_run":"runs/20260703-153908-e81-toptag-profile-stress"}
+  ],
+  "candidate_order": ["shared", "balanced", "frozen_residual"],
+  "decision_rules": {
+    "required_complete_rows": 18,
+    "required_paired_transitions": 12,
+    "material_leakage_improvement": -0.05,
+    "proxy_failure_min_discordant_fraction": 0.3333333333,
+    "weak_leakage_bias_association_abs_spearman_max": 0.4,
+    "analysis_aligned_advantage_abs_spearman_min_gain": 0.2
+  },
+  "boundaries": [
+    "This is a retrospective development-shard audit, not independent confirmation.",
+    "No shard numbered 002 or higher may be read, downloaded, cached, or evaluated.",
+    "Probe results are summarized over three frozen probe seeds; no probe-capacity or epoch sweep is allowed.",
+    "The audit may unlock one separately pre-registered shard002 confirmation, but cannot itself establish generality or likelihood improvement."
+  ]
+}

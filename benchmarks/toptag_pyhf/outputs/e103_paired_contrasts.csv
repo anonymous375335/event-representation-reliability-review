@@ -1,0 +1,4 @@
+shard,seed,reference,candidate,delta_leakage_auc,delta_max_abs_mu_bias,delta_physics_auc,material_leakage_improvement,physics_auc_preserved,likelihood_bias_improved,discordant_cleaner_but_not_better
+002,41,shared,balanced,-0.3356517331275821,0.008957644604425274,-0.0010704806051238247,True,True,False,True
+002,42,shared,balanced,-0.3184921975052989,0.009820821228628596,-0.0005974254279851321,True,True,False,True
+002,43,shared,balanced,-0.3178465002045069,-0.0036475475249873046,-0.0007464082302872654,True,True,True,False

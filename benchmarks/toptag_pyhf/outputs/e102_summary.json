@@ -1,0 +1,26 @@
+{
+  "experiment": "E102 frozen exact-checkpoint metric-to-likelihood audit",
+  "generated_at": "2026-08-03T16:14:54",
+  "device": "cuda",
+  "rows": 18,
+  "paired_transitions": 12,
+  "material_leakage_improvement_transitions": 6,
+  "discordant_cleaner_but_not_better": 3,
+  "discordant_fraction": 0.5,
+  "spearman_leakage_vs_max_bias": 0.03611971104231166,
+  "spearman_signal_weighted_residual_vs_max_bias": 0.16202270381836945,
+  "analysis_aligned_abs_spearman_gain": 0.1259029927760578,
+  "complete": true,
+  "finite": true,
+  "proxy_failure_candidate": true,
+  "analysis_aligned_proxy_candidate": false,
+  "decision": "unlock_separate_shard002_confirmation_design",
+  "boundary": [
+    "This is a retrospective development-shard audit, not independent confirmation.",
+    "No shard numbered 002 or higher may be read, downloaded, cached, or evaluated.",
+    "Probe results are summarized over three frozen probe seeds; no probe-capacity or epoch sweep is allowed.",
+    "The audit may unlock one separately pre-registered shard002 confirmation, but cannot itself establish generality or likelihood improvement."
+  ],
+  "confirmation_shard_accessed": false,
+  "independent_test_accessed": false
+}

@@ -1,0 +1,24 @@
+{
+  "experiment": "E103 untouched-shard002 proxy-failure confirmation",
+  "generated_at": "2026-08-03T17:50:05",
+  "confirmation_shard": "002",
+  "rows": 6,
+  "paired_transitions": 3,
+  "material_leakage_improvement_transitions": 3,
+  "discordant_cleaner_but_not_better": 2,
+  "discordant_fraction": 0.6666666666666666,
+  "physics_auc_preserved_all_pairs": true,
+  "complete": true,
+  "finite": true,
+  "independent_proxy_failure_confirmed": true,
+  "decision": "proxy_failure_confirmed_on_shard002",
+  "confirmation_shard_accessed": true,
+  "independent_test_accessed": true,
+  "boundary": [
+    "Shard002 is accessed once only after this config and the controller script are hash-locked and preflight passes.",
+    "The confirmation repeats only the E79 shared-versus-balanced comparison over seeds 41, 42, and 43; E91d is excluded because its E102 transitions were not material leakage improvements.",
+    "No seed, epoch, architecture, probe, binning, nuisance, likelihood, threshold, or proxy sweep is allowed after shard002 access.",
+    "The primary claim is limited to whether substantial nuisance-branch physics-leakage reduction reliably implies lower unmodelled-shift likelihood bias in this TopTag workflow.",
+    "A successful confirmation does not establish a superior replacement proxy, universal transfer, or likelihood improvement by the split representation."
+  ]
+}

@@ -1,0 +1,7 @@
+index_description,filename,size_bytes,checksum,uri,availability
+test_nominal_file_index.json,test_nominal_002.h5.gz,96830162,adler32:e6cad7b9,root://eospublic.cern.ch//eos/opendata/atlas/datascience/CERN-EP-2024-159/test_nominal_002.h5.gz,online
+esup_file_index.json,esup_002.h5.gz,85236745,adler32:4de590ca,root://eospublic.cern.ch//eos/opendata/atlas/datascience/CERN-EP-2024-159/esup_002.h5.gz,online
+esdown_file_index.json,esdown_002.h5.gz,85224232,adler32:166feffc,root://eospublic.cern.ch//eos/opendata/atlas/datascience/CERN-EP-2024-159/esdown_002.h5.gz,online
+cer_file_index.json,cer_002.h5.gz,85243207,adler32:f94ad210,root://eospublic.cern.ch//eos/opendata/atlas/datascience/CERN-EP-2024-159/cer_002.h5.gz,online
+cpos_file_index.json,cpos_002.h5.gz,87236353,adler32:d2428911,root://eospublic.cern.ch//eos/opendata/atlas/datascience/CERN-EP-2024-159/cpos_002.h5.gz,online
+bias_file_index.json,bias_002.h5.gz,85264853,adler32:db40512f,root://eospublic.cern.ch//eos/opendata/atlas/datascience/CERN-EP-2024-159/bias_002.h5.gz,online

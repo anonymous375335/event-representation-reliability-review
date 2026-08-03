@@ -1,0 +1,54 @@
+{
+  "experiment": "E103 untouched-shard002 proxy-failure confirmation",
+  "stage": "single_use_independent_event_shard_confirmation",
+  "source_e102_summary": "runs/20260803-145755-e102-frozen-metric-to-likelihood-audit/summary.json",
+  "source_e102_summary_sha256": "d0b883b49b94274afe1f2023047ab2431a2593df0486c7ee98828b30602d6c61",
+  "full_manifest": "runs/20260621-110653-e75a-toptag-record80030-preflight/record80030_files.csv",
+  "confirmation_shard": "002",
+  "data_root": "/root/autodl-tmp/year1",
+  "data_dir": "/root/autodl-tmp/year1/data_raw/toptag_record80030_e75b",
+  "cache_dir": "/root/autodl-tmp/year1/data_processed/toptag_record80030_e75c/h5_cache",
+  "minimum_data_disk_free_bytes": 8589934592,
+  "minimum_system_disk_free_bytes": 4294967296,
+  "selected_files": [
+    {"index_description":"test_nominal_file_index.json","filename":"test_nominal_002.h5.gz","size_bytes":96830162,"checksum":"adler32:e6cad7b9","uri":"root://eospublic.cern.ch//eos/opendata/atlas/datascience/CERN-EP-2024-159/test_nominal_002.h5.gz","availability":"online"},
+    {"index_description":"esup_file_index.json","filename":"esup_002.h5.gz","size_bytes":85236745,"checksum":"adler32:4de590ca","uri":"root://eospublic.cern.ch//eos/opendata/atlas/datascience/CERN-EP-2024-159/esup_002.h5.gz","availability":"online"},
+    {"index_description":"esdown_file_index.json","filename":"esdown_002.h5.gz","size_bytes":85224232,"checksum":"adler32:166feffc","uri":"root://eospublic.cern.ch//eos/opendata/atlas/datascience/CERN-EP-2024-159/esdown_002.h5.gz","availability":"online"},
+    {"index_description":"cer_file_index.json","filename":"cer_002.h5.gz","size_bytes":85243207,"checksum":"adler32:f94ad210","uri":"root://eospublic.cern.ch//eos/opendata/atlas/datascience/CERN-EP-2024-159/cer_002.h5.gz","availability":"online"},
+    {"index_description":"cpos_file_index.json","filename":"cpos_002.h5.gz","size_bytes":87236353,"checksum":"adler32:d2428911","uri":"root://eospublic.cern.ch//eos/opendata/atlas/datascience/CERN-EP-2024-159/cpos_002.h5.gz","availability":"online"},
+    {"index_description":"bias_file_index.json","filename":"bias_002.h5.gz","size_bytes":85264853,"checksum":"adler32:db40512f","uri":"root://eospublic.cern.ch//eos/opendata/atlas/datascience/CERN-EP-2024-159/bias_002.h5.gz","availability":"online"}
+  ],
+  "training": {
+    "seeds": [41, 42, 43],
+    "epochs": 6,
+    "batch_size": 4096,
+    "learning_rate": 0.0008,
+    "val_ratio": 0.2,
+    "orth_lambda": 0.25,
+    "bins": 20,
+    "max_events_per_domain": 100000,
+    "max_constituents": 80
+  },
+  "probes": {"epochs": 8, "seeds": [8201, 8202, 8203], "batch_size": 4096},
+  "candidates": ["shared", "balanced"],
+  "decision_rules": {
+    "required_complete_rows": 6,
+    "required_paired_transitions": 3,
+    "material_leakage_improvement": -0.05,
+    "minimum_material_transitions": 2,
+    "proxy_failure_min_discordant_fraction": 0.3333333333,
+    "physics_auc_min_delta": -0.01
+  },
+  "dependency_sha256": {
+    "scripts/e79_toptag_score_template_export.py": "de150e36fa7909fa0d4c2cf0fb5ee56516c083d07c5879761601d7deadc24731",
+    "scripts/e81_toptag_profile_stress.py": "5d3330ec5690c6bec507f3acd3dbbf9cf9469b19cda8070735f72b68c550b100",
+    "scripts/e102_metric_to_likelihood_audit.py": "037fb375eb249879e1facaa3f2d275f886fc7dadd3dc5e9813cb13516d58ce2d"
+  },
+  "boundaries": [
+    "Shard002 is accessed once only after this config and the controller script are hash-locked and preflight passes.",
+    "The confirmation repeats only the E79 shared-versus-balanced comparison over seeds 41, 42, and 43; E91d is excluded because its E102 transitions were not material leakage improvements.",
+    "No seed, epoch, architecture, probe, binning, nuisance, likelihood, threshold, or proxy sweep is allowed after shard002 access.",
+    "The primary claim is limited to whether substantial nuisance-branch physics-leakage reduction reliably implies lower unmodelled-shift likelihood bias in this TopTag workflow.",
+    "A successful confirmation does not establish a superior replacement proxy, universal transfer, or likelihood improvement by the split representation."
+  ]
+}

@@ -2,14 +2,14 @@
 
 Anonymous review package for reproducing the representation-reliability checks reported in the paper.
 
-Large ROOT files, TopTag HDF5 files, derived tensors, checkpoints and run directories are not tracked in git. The repository keeps the code, small manifests, source-data CSV files and benchmark summaries used by the reported checks. The anonymous review archive `event-representation-reliability-review-artifacts-v1.zip` is supplied through the journal submission system. Its archive SHA-256 is recorded in `data/reviewer_artifact_archive_v1.sha256`, and its 92-file payload manifest is tracked in `data/reviewer_artifact_archive_v1_manifest.csv`. A public archival DOI will be added to the accepted version.
+Large ROOT files, TopTag HDF5 files, derived tensors, checkpoints and run directories are not tracked in git. The repository keeps the code, small manifests, source-data CSV files and benchmark summaries used by the reported checks. The anonymous review archive `event-representation-reliability-review-artifacts-v2.zip` is supplied through the journal submission system. Its archive SHA-256 and payload manifest are tracked under `data/reviewer_artifact_archive_v2_*`. Version 2 adds the frozen E102 development audit and the preregistered E103 shard002 confirmation, including the preserved three-seed E79/E81 run directories. A public archival DOI will be added to the accepted version.
 
 ## Contents
 
 - `scripts/`: experiment and figure-generation entry points.
 - `benchmarks/toptag_pyhf/`: TopTag score-template and `pyhf` benchmark package.
 - `data/`: public-data and external-asset manifests.
-- `data/reviewer_artifact_archive_v1_*`: review-archive checksum, file manifest and original-binary availability record.
+- `data/reviewer_artifact_archive_v2_*`: review-archive checksum, file manifest and original-binary availability record.
 - `figures/source_data_*.csv`: source data for manuscript figures; `figures/source_data_manifest.sha256` records their file hashes.
 
 ## Environment
@@ -87,18 +87,27 @@ python scripts/e78_toptag_reference_calibration.py \
 ```
 
 The likelihood-facing TopTag benchmark is packaged separately. Inspect the
-packaged cross-shard summary first:
+packaged cross-shard and proxy-to-likelihood summaries first:
 
 ```bash
 python benchmarks/toptag_pyhf/scripts/summarize_likelihood_results.py
 ```
+
+The frozen E102 and E103 results are stored under
+`benchmarks/toptag_pyhf/outputs/`. E102 retrospectively evaluates exact
+checkpoints from development shards 000 and 001. E103 is a one-shot
+confirmation on event shard002 whose configuration, controller and decision
+rules were frozen before access. The E103 output is provided for inspection
+and verification; it must not be rerun with additional seeds, thresholds,
+probes, likelihoods or proxy definitions after the confirmation shard was
+consumed.
 
 Workspace regeneration requires an E79 run directory containing
 `score_templates.csv`. After unpacking the review archive at the repository
 root, the canonical preserved path is:
 
 ```bash
-export E79_RUN_DIR="$PWD/event-representation-reliability-review-artifacts-v1/runs/toptag/e79/shard000_seed41"
+export E79_RUN_DIR="$PWD/event-representation-reliability-review-artifacts-v2/runs/toptag/e79/shard000_seed41"
 ```
 
 Use that path as follows:
@@ -128,4 +137,4 @@ The script writes PDF, SVG and TIFF panels under `figures/`. Generated figure fi
 
 ## Reproducibility Notes
 
-The package supports inspection of representation-level and likelihood-facing reliability checks for the CMS H4l and TopTag workflows. Inputs are public CMS H4l files and CERN Open Data TopTag shards. Figure files can be regenerated from the tracked source CSV files. The review archive supplies the exact H4l tensor, the exact EveNet checkpoint, the three H4l headline run records, the H4l controls, four preserved E79 original run directories, and all E79/E91d reports and aggregate summaries. Remaining TopTag settings are regeneration-only and are marked explicitly in the archive. Generated tensors and model checkpoints remain ignored by git.
+The package supports inspection of representation-level and likelihood-facing reliability checks for the CMS H4l and TopTag workflows. Inputs are public CMS H4l files and CERN Open Data TopTag shards. Figure files can be regenerated from the tracked source CSV files. The review archive supplies the exact H4l tensor, the exact EveNet checkpoint, the three H4l headline run records, the H4l controls, four preserved development E79 original run directories, the E79/E91d reports and aggregate summaries, and the complete preserved E103 shared-versus-balanced confirmation runs for seeds 41--43. Development settings whose original GPU directory was not synchronized remain marked as regeneration-only; no replacement checkpoint is represented as an archived original. Generated tensors and model checkpoints remain ignored by git.

@@ -6,4 +6,4 @@ toptag_record80030_first_shards,ATLAS TopTag record 80030 first balanced systema
 toptag_record80030_h5_cache,Derived HDF5 cache for selected record 80030 shards,varies,per-jet high-level and constituent arrays,no
 toptag_reference_dataset,Top Quark Tagging Reference Dataset DOI 10.5281/zenodo.2603256,train/validation HDF5 files,particle-level top-tagging reference,no
 toptag_constituent_checkpoints,Constituent encoder checkpoints for E76b/E77/E78,varies,checkpoint,no
-reviewer_artifact_archive_v1,Anonymous review archive supplied through the journal submission system,1 ZIP plus tracked SHA-256 and payload manifest,mixed derived artifacts,no
+reviewer_artifact_archive_v2,Anonymous review archive supplied through the journal submission system; includes E102 and preregistered E103 evidence,1 ZIP plus tracked SHA-256 and payload manifest,mixed derived artifacts,no
